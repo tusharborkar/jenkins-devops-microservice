@@ -1,12 +1,20 @@
-FROM jenkins/jenkins:2.492.1-jdk17
-USER root
-RUN apt-get update && apt-get install -y lsb-release
-RUN curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
-  https://download.docker.com/linux/debian/gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) \
-  signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
-  https://download.docker.com/linux/debian \
-  $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
-RUN apt-get update && apt-get install -y docker-ce-cli
-USER jenkins
-RUN jenkins-plugin-cli --plugins "blueocean docker-workflow"
+
+# For Java 8, try this
+# FROM openjdk:8-jdk-alpine
+
+# For Java 11, try this
+FROM adoptopenjdk/openjdk11:ubi
+
+# Refer to Maven build -> finalName
+ARG JAR_FILE=target/currancy-convert-0.0.1-SNAPSHOT.jar
+
+# cd /opt/app
+WORKDIR /opt/app
+
+# cp target/spring-boot-web.jar /opt/app/app.jar
+COPY ${JAR_FILE} app.jar
+
+# java -jar /opt/app/app.jar
+ENTRYPOINT ["java","-jar","app.jar"]
+
+EXPOSE 8080
