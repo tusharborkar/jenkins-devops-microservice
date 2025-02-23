@@ -8,20 +8,35 @@ pipeline {
     }
 
     stages {
-        stage('Build') {
+        stage('Check Environment') {
             steps {
-                sh 'mvn --version'
-                sh 'docker version'
-                echo "Build"
-
+                sh 'whoami'
+                sh 'id'
+                sh 'echo $PATH'
             }
         }
-        stage('Test') {
-                    steps {
-                      echo "Test"
+
+        stage('Build') {
+            steps {
+                script {
+                    try {
+                        sh 'mvn --version'
+                        sh 'docker version || echo "Docker command failed"'
+                        echo "Build stage completed successfully!"
+                    } catch (Exception e) {
+                        echo "Error in Build stage: ${e}"
+                        currentBuild.result = 'FAILURE'
                     }
+                }
+            }
         }
 
+        stage('Test') {
+            steps {
+                echo "Running Tests..."
+                // Add your test commands here
+            }
+        }
     }
 
     post {
